@@ -2,6 +2,7 @@ import * as employeeRepository from "../repositories/employeeRepository.js";
 import * as cardRepository from "../repositories/cardRepository.js";
 import * as paymentRepository from "../repositories/paymentRepository.js";
 import * as rechargeRepository from "../repositories/rechargeRepository.js";
+import * as cardUtil from "../utils/cardUtil.js";
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
 import bcrypt from "bcrypt";
@@ -17,6 +18,10 @@ export async function createCard(
   const cardNumber = faker.finance.creditCardNumber("mastercard");
   const cardholderName = formatNameToCardHolderName(employee.fullName);
   const cardExpirationDate = dayjs().add(5, "year").format("MM/YY");
+
+  const cvc = faker.finance.creditCardCVV();
+  //   console.log(cvc)
+  //   const hashSecurityCode = bcrypt.hashSync(cvc, 10);
   const hashSecurityCode = bcrypt.hashSync(faker.finance.creditCardCVV(), 10);
 
   const Card: cardRepository.CardInsertData = {
@@ -111,8 +116,7 @@ export async function getCardBalance(id: number) {
   await validateCard(id);
   const payments = await paymentRepository.findByCardId(id);
   const recharges = await rechargeRepository.findByCardId(id);
-  const balance: number = await calculateCardBalance();
-  console.log(payments, recharges);
+  const balance: number = cardUtil.calculateBalance(payments, recharges);
 
   const cardData = {
     balance,
@@ -123,15 +127,11 @@ export async function getCardBalance(id: number) {
   return cardData;
 }
 
-async function calculateCardBalance() {
-  return 1234;
-}
-
 // --------------------------- CARD RECHARGE ---------------------------
 
 export async function rechargeCard(cardId: number, amount: number) {
-  const cardData = await validateCard(cardId);
-  await checkIfCardIsAlreadyActive(cardData);
+  await validateCard(cardId);
+  await validateExpirationDate(cardId);
 
   await rechargeRepository.insert({ cardId, amount });
 }

@@ -9,8 +9,8 @@ import cardRechargeSchema from "../schemas/cardRechargeSchema.js"
 const cardRouter = Router();
 
 cardRouter.post("/card/create", apiKeyValidationMiddleware, schemaValidationMiddleware(cardCreateSchema), controller.createCard);
-cardRouter.put("/card/:id/activate", schemaValidationMiddleware(cardActivateSchema), controller.activateCard)
 cardRouter.get("/card/:id", controller.getCardBalance)
+cardRouter.put("/card/:id/activate", schemaValidationMiddleware(cardActivateSchema), controller.activateCard)
 
 cardRouter.post("/card/:id/recharge", apiKeyValidationMiddleware, schemaValidationMiddleware(cardRechargeSchema), controller.rechargeCard)
 
