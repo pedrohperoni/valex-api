@@ -1,23 +1,17 @@
 import * as cardRepository from "../repositories/cardRepository.js";
 import * as businessRepository from "../repositories/businessRepository.js";
 import * as paymentRepository from "../repositories/paymentRepository.js"
-
-import * as cardUtil from "../utils/cardUtil.js"
+import * as balanceUtil from "../utils/balanceUtil.js"
 import dayjs from "dayjs";
 import bcrypt from "bcrypt";
 
-export async function newPurchase(
-  amount: number,
-  businessId: number,
-  cardId: number,
-  password: string
-) {
+export async function newPurchase(amount: number, businessId: number, cardId: number, password: string) {
   const card = await validateCard(cardId);
   await validateExpirationDate(cardId);
   await checkPasswordMatch(card, password)
   const business = await validateBusiness(businessId)
   await checkBusinessAndCardType(business.type, card.type)
-  await cardUtil.calculateIfEnoughCreditForPurchase(cardId, amount)
+  await balanceUtil.calculateIfEnoughCreditForPurchase(cardId, amount)
 
   await paymentRepository.insert({cardId, businessId, amount})
 }

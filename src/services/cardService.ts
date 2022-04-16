@@ -2,7 +2,7 @@ import * as employeeRepository from "../repositories/employeeRepository.js";
 import * as cardRepository from "../repositories/cardRepository.js";
 import * as paymentRepository from "../repositories/paymentRepository.js";
 import * as rechargeRepository from "../repositories/rechargeRepository.js";
-import * as cardUtil from "../utils/cardUtil.js";
+import * as balanceUtil from "../utils/balanceUtil.js";
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
 import bcrypt from "bcrypt";
@@ -69,11 +69,7 @@ function formatNameToCardHolderName(fullName: string) {
 
 // --------------------------- CARD ACTIVATION ---------------------------
 
-export async function activateCard(
-  cardId: number,
-  securityCode: string,
-  password: string
-) {
+export async function activateCard(cardId: number, securityCode: string, password: string) {
   const cardData = await validateCard(cardId);
   await validateExpirationDate(cardData);
   await checkIfCardIsAlreadyActive(cardData);
@@ -114,14 +110,14 @@ export async function getCardBalance(id: number) {
   await validateCard(id);
   const payments = await paymentRepository.findByCardId(id);
   const recharges = await rechargeRepository.findByCardId(id);
-  const balance: number = cardUtil.calculateBalance(payments, recharges);
+  const balance: number = balanceUtil.calculateBalance(payments, recharges);
 
   const cardData = {
     balance,
     payments,
     recharges,
   };
-  
+
   return cardData;
 }
 
