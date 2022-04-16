@@ -17,3 +17,12 @@ export async function activateCard(req: Request, res: Response) {
 
   res.sendStatus(201);
 }
+
+
+export async function getCardBalance(req: Request, res: Response) {
+   const cardId = parseInt(req.params.id)
+
+   const cardData = await cardService.getCardBalance(cardId)
+   res.status(201).send(cardData)
+
+}

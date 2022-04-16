@@ -1,5 +1,7 @@
 import * as employeeRepository from "../repositories/employeeRepository.js";
 import * as cardRepository from "../repositories/cardRepository.js";
+import * as paymentRepository from "../repositories/paymentRepository.js";
+import * as rechargeRepository from "../repositories/rechargeRepository.js";
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
 import bcrypt from "bcrypt";
@@ -70,7 +72,6 @@ export async function activateCard(
   password: string
 ) {
   const cardData = await validateCard(cardId);
-  console.log(cardData);
   await validateExpirationDate(cardData);
   await checkIfCardIsAlreadyActive(cardData);
   await checkSecurityCodeMatch(cardData, securityCode);
@@ -102,4 +103,26 @@ async function checkIfCardIsAlreadyActive(card: any) {
 async function checkSecurityCodeMatch(card: any, securityCode: string) {
   if (!bcrypt.compareSync(securityCode, card.securityCode))
     throw { type: "unauthorized", message: "Security code does not match" };
+}
+
+// --------------------------- CARD BALANCE AND TRANSACTIONS ---------------------------
+
+export async function getCardBalance(id: number) {
+  await validateCard(id);
+  const payments = await paymentRepository.findByCardId(id);
+  const recharges = await rechargeRepository.findByCardId(id);
+  const balance: number = await calculateCardBalance();
+  console.log(payments, recharges);
+
+  const cardData = {
+    balance,
+    payments,
+    recharges,
+  };
+  console.log(cardData)
+  return cardData;
+}
+
+async function calculateCardBalance() {
+   return 1234
 }
