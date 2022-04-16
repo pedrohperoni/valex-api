@@ -20,7 +20,6 @@ export async function createCard(
   const cardExpirationDate = dayjs().add(5, "year").format("MM/YY");
   const securityCode = faker.finance.creditCardCVV();
   const hashSecurityCode = bcrypt.hashSync(securityCode, 10);
-  console.log(securityCode)
 
   const Card: cardRepository.CardInsertData = {
     employeeId,
@@ -69,7 +68,11 @@ function formatNameToCardHolderName(fullName: string) {
 
 // --------------------------- CARD ACTIVATION ---------------------------
 
-export async function activateCard(cardId: number, securityCode: string, password: string) {
+export async function activateCard(
+  cardId: number,
+  securityCode: string,
+  password: string
+) {
   const cardData = await validateCard(cardId);
   await validateExpirationDate(cardData);
   await checkIfCardIsAlreadyActive(cardData);

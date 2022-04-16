@@ -11,7 +11,7 @@ export async function getBalance(cardId: number) {
   const payments = await paymentRepository.findByCardId(cardId);
   const recharges = await rechargeRepository.findByCardId(cardId);
   const balance = calculateBalance(payments, recharges);
-  return balance
+  return balance;
 }
 
 export function calculateBalance(payments: any, recharges: any) {
@@ -25,5 +25,5 @@ export function calculateBalance(payments: any, recharges: any) {
     balance -= payment.amount;
   });
 
-  return balance
+  return balance;
 }

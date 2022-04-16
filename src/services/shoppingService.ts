@@ -1,19 +1,24 @@
 import * as cardRepository from "../repositories/cardRepository.js";
 import * as businessRepository from "../repositories/businessRepository.js";
-import * as paymentRepository from "../repositories/paymentRepository.js"
-import * as balanceUtil from "../utils/balanceUtil.js"
+import * as paymentRepository from "../repositories/paymentRepository.js";
+import * as balanceUtil from "../utils/balanceUtil.js";
 import dayjs from "dayjs";
 import bcrypt from "bcrypt";
 
-export async function newPurchase(amount: number, businessId: number, cardId: number, password: string) {
+export async function newPurchase(
+  amount: number,
+  businessId: number,
+  cardId: number,
+  password: string
+) {
   const card = await validateCard(cardId);
   await validateExpirationDate(cardId);
-  await checkPasswordMatch(card, password)
-  const business = await validateBusiness(businessId)
-  await checkBusinessAndCardType(business.type, card.type)
-  await balanceUtil.calculateIfEnoughCreditForPurchase(cardId, amount)
+  await checkPasswordMatch(card, password);
+  const business = await validateBusiness(businessId);
+  await checkBusinessAndCardType(business.type, card.type);
+  await balanceUtil.calculateIfEnoughCreditForPurchase(cardId, amount);
 
-  await paymentRepository.insert({cardId, businessId, amount})
+  await paymentRepository.insert({ cardId, businessId, amount });
 }
 
 async function validateCard(cardId: number) {
@@ -31,16 +36,21 @@ async function validateExpirationDate(card: any) {
 }
 
 async function checkPasswordMatch(card: any, password: string) {
-   if (!bcrypt.compareSync(password, card.password))
-     throw { type: "unauthorized", message: "Wrong Password" };
- }
+  if (!bcrypt.compareSync(password, card.password))
+    throw { type: "unauthorized", message: "Wrong Password" };
+}
 
-async function validateBusiness(businessId: number){
-   const business = await businessRepository.findById(businessId);
-   if(!business) throw { type: "not_found", message: "Business does not exist"}
-   return business
- }
+async function validateBusiness(businessId: number) {
+  const business = await businessRepository.findById(businessId);
+  if (!business)
+    throw { type: "not_found", message: "Business does not exist" };
+  return business;
+}
 
- async function checkBusinessAndCardType(businessType: string, cardType: string){
-   if(businessType !== cardType) throw { type: "unauthorized", message: "Business and card types must match"}
- }
+async function checkBusinessAndCardType(businessType: string, cardType: string) {
+  if (businessType !== cardType)
+    throw {
+      type: "unauthorized",
+      message: "Business and card types must match",
+    };
+}
