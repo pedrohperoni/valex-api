@@ -4,6 +4,8 @@ import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
 import bcrypt from "bcrypt";
 
+// --------------------------- CARD CREATION ---------------------------
+
 export async function createCard(
   employeeId: number,
   cardType: cardRepository.TransactionTypes
@@ -13,13 +15,13 @@ export async function createCard(
   const cardNumber = faker.finance.creditCardNumber("mastercard");
   const cardholderName = formatNameToCardHolderName(employee.fullName);
   const cardExpirationDate = dayjs().add(5, "year").format("MM/YY");
-  const CVC = bcrypt.hashSync(faker.finance.creditCardCVV(), 10);
+  const hashSecurityCode = bcrypt.hashSync(faker.finance.creditCardCVV(), 10);
 
   const Card: cardRepository.CardInsertData = {
     employeeId,
     number: cardNumber,
     cardholderName,
-    securityCode: CVC,
+    securityCode: hashSecurityCode,
     expirationDate: cardExpirationDate,
     isVirtual: false,
     isBlocked: false,
@@ -41,6 +43,7 @@ async function validateEmployeeCardType(
 ) {
   const findCardByEmployeeAndCardType =
     await cardRepository.findByTypeAndEmployeeId(cardType, employeeId);
+
   if (findCardByEmployeeAndCardType)
     throw {
       type: "unauthorized",
@@ -57,4 +60,46 @@ function formatNameToCardHolderName(fullName: string) {
   }
   simplifiedName += ` ${name[name.length - 1]}`;
   return simplifiedName.toUpperCase();
+}
+
+// --------------------------- CARD ACTIVATION ---------------------------
+
+export async function activateCard(
+  cardId: number,
+  securityCode: string,
+  password: string
+) {
+  const cardData = await validateCard(cardId);
+  console.log(cardData);
+  await validateExpirationDate(cardData);
+  await checkIfCardIsAlreadyActive(cardData);
+  await checkSecurityCodeMatch(cardData, securityCode);
+  const hashPassword = bcrypt.hashSync(password, 10);
+
+  await cardRepository.update(cardId, { password: hashPassword });
+}
+
+async function validateCard(cardId: number) {
+  const card = await cardRepository.findById(cardId);
+  if (!card) throw { type: "not_found", message: "Card not found" };
+  return card;
+}
+
+async function validateExpirationDate(card: any) {
+  if (dayjs().format("MM/YY") > card.expirationDate)
+    throw {
+      type: "unauthorized",
+      message: "Card is no longer valid (expired)",
+    };
+}
+
+async function checkIfCardIsAlreadyActive(card: any) {
+  if (card.password !== null) {
+    throw { type: "conflict", message: "Card is already active" };
+  }
+}
+
+async function checkSecurityCodeMatch(card: any, securityCode: string) {
+  if (!bcrypt.compareSync(securityCode, card.securityCode))
+    throw { type: "unauthorized", message: "Security code does not match" };
 }

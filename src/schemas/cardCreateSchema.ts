@@ -1,6 +1,6 @@
 import joi from "joi";
 
-const cardSchema = joi.object({
+const cardCreateSchema = joi.object({
    employeeId: joi
     .number()
     .required(),
@@ -10,4 +10,4 @@ const cardSchema = joi.object({
     .required(),
 });
 
-export default cardSchema;
+export default cardCreateSchema;

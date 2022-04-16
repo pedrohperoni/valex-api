@@ -5,6 +5,8 @@ import "express-async-errors";
 import router from "../src/routers/index.js";
 import { errorHandlerMiddleware } from "./middlewares/errorHandlerMiddleware.js";
 
+
+
 const app = express();
 dotenv.config();
 
