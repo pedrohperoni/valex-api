@@ -18,11 +18,9 @@ export async function createCard(
   const cardNumber = faker.finance.creditCardNumber("mastercard");
   const cardholderName = formatNameToCardHolderName(employee.fullName);
   const cardExpirationDate = dayjs().add(5, "year").format("MM/YY");
-
-  const cvc = faker.finance.creditCardCVV();
-  //   console.log(cvc)
-  //   const hashSecurityCode = bcrypt.hashSync(cvc, 10);
-  const hashSecurityCode = bcrypt.hashSync(faker.finance.creditCardCVV(), 10);
+  const securityCode = faker.finance.creditCardCVV();
+  const hashSecurityCode = bcrypt.hashSync(securityCode, 10);
+  console.log(securityCode)
 
   const Card: cardRepository.CardInsertData = {
     employeeId,
@@ -123,7 +121,7 @@ export async function getCardBalance(id: number) {
     payments,
     recharges,
   };
-  console.log(cardData);
+  
   return cardData;
 }
 
