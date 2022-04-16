@@ -119,10 +119,19 @@ export async function getCardBalance(id: number) {
     payments,
     recharges,
   };
-  console.log(cardData)
+  console.log(cardData);
   return cardData;
 }
 
 async function calculateCardBalance() {
-   return 1234
+  return 1234;
+}
+
+// --------------------------- CARD RECHARGE ---------------------------
+
+export async function rechargeCard(cardId: number, amount: number) {
+  const cardData = await validateCard(cardId);
+  await checkIfCardIsAlreadyActive(cardData);
+
+  await rechargeRepository.insert({ cardId, amount });
 }

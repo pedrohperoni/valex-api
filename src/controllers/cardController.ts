@@ -23,6 +23,16 @@ export async function getCardBalance(req: Request, res: Response) {
    const cardId = parseInt(req.params.id)
 
    const cardData = await cardService.getCardBalance(cardId)
-   res.status(201).send(cardData)
+   res.status(200).send(cardData)
 
+}
+
+export async function rechargeCard(req: Request, res: Response) {
+   const { amount} = req.body
+   const cardId = parseInt(req.params.id)
+   console.log("recharge", amount)
+
+   await cardService.rechargeCard(cardId,amount)
+
+   res.sendStatus(201)
 }
